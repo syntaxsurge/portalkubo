@@ -2,7 +2,16 @@
 
 import * as React from 'react'
 
-import { Download, ExternalLink, Monitor, Smartphone } from 'lucide-react'
+import {
+  Check,
+  Copy,
+  Download,
+  ExternalLink,
+  LogOut,
+  Monitor,
+  Smartphone,
+  Wallet
+} from 'lucide-react'
 
 import { buttonClasses } from '@/components/ui/button'
 import {
@@ -46,6 +55,7 @@ export function WalletConnectButton({
 }) {
   const [mounted, setMounted] = React.useState(false)
   const [installDialogOpen, setInstallDialogOpen] = React.useState(false)
+  const [accountDialogOpen, setAccountDialogOpen] = React.useState(false)
   const wallet = usePolkadotWallet()
 
   React.useEffect(() => {
@@ -93,18 +103,130 @@ export function WalletConnectButton({
   }
 
   return (
-    <button
-      type='button'
-      className={buttonClasses({
-        variant: 'outline',
-        size: 'md',
-        className: cn('min-w-[11rem] px-5 whitespace-nowrap', className)
-      })}
-      onClick={wallet.disconnect}
-      title={`Disconnect ${wallet.selectedAccount?.source ?? 'wallet'}`}
-    >
-      {shortenAddress(wallet.address)}
-    </button>
+    <>
+      <button
+        type='button'
+        className={buttonClasses({
+          variant: 'outline',
+          size: 'md',
+          className: cn('min-w-[11rem] px-5 whitespace-nowrap', className)
+        })}
+        onClick={() => setAccountDialogOpen(true)}
+        title={`Open ${wallet.selectedAccount?.source ?? 'wallet'} account`}
+      >
+        {shortenAddress(wallet.address)}
+      </button>
+      <WalletAccountDialog
+        open={accountDialogOpen}
+        onOpenChange={setAccountDialogOpen}
+        address={wallet.address}
+        accountName={wallet.selectedAccount?.name ?? 'Wallet account'}
+        walletSource={wallet.selectedAccount?.source ?? 'wallet'}
+        onDisconnect={() => {
+          wallet.disconnect()
+          setAccountDialogOpen(false)
+        }}
+      />
+    </>
+  )
+}
+
+function WalletAccountDialog({
+  open,
+  onOpenChange,
+  address,
+  accountName,
+  walletSource,
+  onDisconnect
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  address: string | null
+  accountName: string
+  walletSource: string
+  onDisconnect: () => void
+}) {
+  const [copied, setCopied] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!open) {
+      setCopied(false)
+    }
+  }, [open])
+
+  const copyAddress = React.useCallback(async () => {
+    if (!address) {
+      return
+    }
+
+    await navigator.clipboard.writeText(address)
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1800)
+  }, [address])
+
+  return (
+    <ShadcnDialog open={open} onOpenChange={onOpenChange}>
+      <ShadcnDialogContent className='max-w-md'>
+        <ShadcnDialogHeader>
+          <ShadcnDialogTitle>Wallet connected</ShadcnDialogTitle>
+          <ShadcnDialogDescription>
+            Manage the account connected to PortalKubo.
+          </ShadcnDialogDescription>
+        </ShadcnDialogHeader>
+
+        <div className='space-y-5'>
+          <div className='border-border bg-muted/30 rounded-lg border p-4'>
+            <div className='flex items-start gap-3'>
+              <span className='bg-primary text-primary-foreground grid h-11 w-11 shrink-0 place-items-center rounded-lg'>
+                <Wallet className='h-5 w-5' aria-hidden />
+              </span>
+              <div className='min-w-0'>
+                <p className='truncate text-sm font-semibold'>{accountName}</p>
+                <p className='text-muted-foreground mt-1 text-xs capitalize'>
+                  {walletSource}
+                </p>
+                <p className='mt-3 font-mono text-sm break-all'>
+                  {address ?? 'No account selected'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className='grid gap-3 sm:grid-cols-2'>
+            <button
+              type='button'
+              className={buttonClasses({
+                variant: 'outline',
+                size: 'md',
+                className: 'w-full'
+              })}
+              onClick={() => void copyAddress()}
+              disabled={!address}
+            >
+              {copied ? (
+                <Check className='h-4 w-4' aria-hidden />
+              ) : (
+                <Copy className='h-4 w-4' aria-hidden />
+              )}
+              {copied ? 'Copied' : 'Copy address'}
+            </button>
+            <button
+              type='button'
+              className={buttonClasses({
+                variant: 'outline',
+                size: 'md',
+                className:
+                  'border-destructive/35 text-destructive hover:border-destructive/60 hover:bg-destructive/10'
+              })}
+              onClick={onDisconnect}
+            >
+              <LogOut className='h-4 w-4' aria-hidden />
+              Disconnect
+            </button>
+          </div>
+        </div>
+      </ShadcnDialogContent>
+    </ShadcnDialog>
   )
 }
 

@@ -1,9 +1,7 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import * as React from 'react'
-
-import { useRouter } from 'nextjs-toploader/app'
 
 import {
   WALLET_ADDRESS_COOKIE,

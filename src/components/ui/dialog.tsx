@@ -30,10 +30,12 @@ ShadcnDialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
 const ShadcnDialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
+    overlayClassName?: string
+  }
+>(({ className, overlayClassName, children, ...props }, ref) => (
   <ShadcnDialogPortal>
-    <ShadcnDialogOverlay />
+    <ShadcnDialogOverlay className={overlayClassName} />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(

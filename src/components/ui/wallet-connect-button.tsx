@@ -166,7 +166,10 @@ function WalletAccountDialog({
 
   return (
     <ShadcnDialog open={open} onOpenChange={onOpenChange}>
-      <ShadcnDialogContent className='max-w-md'>
+      <ShadcnDialogContent
+        className='z-[110] max-w-md'
+        overlayClassName='z-[100]'
+      >
         <ShadcnDialogHeader>
           <ShadcnDialogTitle>Wallet connected</ShadcnDialogTitle>
           <ShadcnDialogDescription>
